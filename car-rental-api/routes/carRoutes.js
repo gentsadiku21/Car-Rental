@@ -1,17 +1,22 @@
 const express = require("express");
-const Car = require("../models/Car");  // Import Car model
+const Car = require("../models/Car"); 
 const router = express.Router();
 
-// Get all rental cars, sorted by price (low to high)
+
 router.get("/rental-cars", async (req, res) => {
   try {
-    let query = {};
+    let query = {}; 
     if (req.query.year) query.year = req.query.year;
     if (req.query.color) query.color = req.query.color;
     if (req.query.steering_type) query.steering_type = req.query.steering_type;
     if (req.query.number_of_seats) query.number_of_seats = req.query.number_of_seats;
 
-    // Fetch cars based on filters and sort by price
+    // Search car by name
+    if (req.query.name) {
+      query.name = { $regex: new RegExp(req.query.name, "i") };
+    }
+
+    // Fetch cars  and sort by price (low to high)
     const cars = await Car.find(query).sort({ price_per_day: 1 });
 
     res.json(cars);
@@ -21,7 +26,7 @@ router.get("/rental-cars", async (req, res) => {
   }
 });
 
-// Add a new car 
+// Create(add) a new car 
 router.post("/add-car", async (req, res) => {
   try {
     const { name, price_per_day, year, color, steering_type, number_of_seats } = req.body;
